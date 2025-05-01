@@ -1,0 +1,75 @@
+import time
+import random
+#import fluent.sender
+#import clickhouse_connect
+import json
+import socket
+
+# Configure Fluent Bit
+#logger = fluent.sender.FluentSender('app', host='fluent-bit', port=5170)
+
+# client = clickhouse_connect.get_client(
+#     host='localhost',
+#     port=8123,
+#     username='demo_user',
+#     password='P@ssword1',
+# )
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock.connect(("vector", 9100))
+
+def get_random_service():
+    return random.choice(["api-service", "web-service", "database-service"])
+
+def generate_random_message(response_time, timestamp, service):
+    choices = [
+        "[SUCCESS][{}] {} operation completed - {}".format(timestamp, service, response_time),
+        "[ERROR][{}] {} API endpoint not available - {}".format(timestamp, service, response_time),
+        "[ERROR][{}] {} Illegal argument - {}".format(timestamp, service, response_time),
+        "[ERROR][{}] {} 401 unauthorized - {}".format(timestamp, service, response_time),
+        "[ERROR][{}] {} missing parameter - {}".format(timestamp, service, response_time),
+        "[WARNING][{}] {} memory consumption over 70 percent - {}".format(timestamp, service, response_time),
+        "[WARNING][{}] {} computation power is exhausted, over 60 percent consumed - {}".format(timestamp, service, response_time),
+    ]
+
+    return random.choice(choices)
+
+def generate_log():
+    normal_response_time = random.randint(100, 500)  # Normal response time
+    anomaly = random.random() < 0.1  # 10% chance of an anomaly
+    response_time = random.randint(2000, 5000) if anomaly else normal_response_time
+    
+    # pick random service and message building
+    ts = time.strftime("%Y-%m-%d %H:%M:%S")
+    service = get_random_service()
+
+    log_entry = {
+        "timestamp": ts,
+        "service": service,
+        "response_time": response_time,
+        "message": generate_random_message(response_time, ts, service)
+    }
+    
+    # if not logger.emit('logs', log_entry):
+    #     print(f"last error: {logger.last_error}")
+    #     logger.clear_last_error() 
+    # else:
+    #     print(f"Sent log: {log_entry}")
+
+    #client.insert('sample_logs', log_entry, column_names=["timestamp", "service", "response_time", "message"])
+    
+    #print(json.dumps(log_entry), flush=True)
+    #sock.send(json.dumps(log_entry).encode('utf-8'))
+    sock.sendall((json.dumps(log_entry) + "\n").encode("utf-8"))
+
+while True:
+    generate_log()
+    time.sleep(10)  # Generate logs every second
+
+# ddl schema
+# {  
+#   timestamp DateTime64(3),
+#   service String,
+#   response_time UInt16,
+#   message String
+# }

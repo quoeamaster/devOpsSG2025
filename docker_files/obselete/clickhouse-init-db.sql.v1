@@ -1,0 +1,13 @@
+create table sample_logs
+(
+   timestamp DateTime64(3),
+   service String,
+   response_time UInt16,
+   message String
+) engine=MergeTree()
+order by (service)
+;
+
+create user if not exists demo_user IDENTIFIED BY 'P@ssword1';
+grant select, insert, update, delete on default.sample_logs to demo_user;
+

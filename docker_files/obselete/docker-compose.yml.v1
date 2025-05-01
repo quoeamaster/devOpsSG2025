@@ -1,0 +1,33 @@
+version: '3.8'
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:25.2
+    container_name: clickhouse
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+      - ./clickhouse-init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: wget --no-verbose --spider http://localhost:8123/ping || exit 1
+      interval: 3s
+      retries: 5
+
+  vector:
+    image: timberio/vector:0.46.X-debian
+    container_name: vector
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+    volumes:
+      - ./vector.yaml:/etc/vector/vector_sample.yaml:ro
+      - ./vector.toml:/etc/vector/vector_sample.toml:ro
+    stdin_open: true
+    tty: true
+    #command: ["/bin/sh", "-c", "sleep 2 && vector -c /etc/vector/vector.toml"]
+    command: ["-c", "/etc/vector/vector_sample.toml"]
+
+volumes:
+  clickhouse-data:
+

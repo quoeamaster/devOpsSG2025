@@ -1,0 +1,45 @@
+
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:25.2
+    container_name: clickhouse
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+      - ./clickhouse-init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: wget --no-verbose --spider http://localhost:8123/ping || exit 1
+      interval: 3s
+      retries: 5
+
+  python:
+    image: python:3.13.3
+    container_name: python
+    depends_on:
+      - clickhouse
+    volumes:
+      - ./../src:/src
+    command: >
+      sh -c "pip3 install --no-cache-dir --root-user-action=ignore clickhouse_connect==0.7.0 scikit-learn==1.6.1 matplotlib==3.10.1 pandas==2.2.3 &&
+            python3 /src/log_generator.py"
+
+  grafana:
+    image: grafana/grafana:11.6.0-ubuntu
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - clickhouse
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_INSTALL_PLUGINS=vertamedia-clickhouse-datasource
+    volumes:
+      - grafana_data:/var/lib/grafana
+
+volumes:
+  clickhouse-data:
+  grafana_data:
+

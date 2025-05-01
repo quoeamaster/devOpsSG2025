@@ -1,0 +1,32 @@
+
+
+# [sources.in]
+# type = "stdin"
+# encoding.codec = "json"
+
+[sources.in]
+type = "socket"
+address = "0.0.0.0:9100"
+mode = "tcp"
+encoding.codec = "json"
+
+[sources.console_in]
+type = "stdin"
+
+[sinks.console_out]
+type = "console"
+inputs = ["console_in"]
+target = "stdout"
+encoding.codec = "json"
+
+[sinks.out]
+type = "clickhouse"
+inputs = [ "in" ]
+endpoint = "http://clickhouse:8123"
+table = "sample_logs"
+auth.strategy = "basic"
+auth.user = "demo_user"
+auth.password = "P@ssword1"
+request.in_flight_limit = 1000
+request.rate_limit_num = 10000
+

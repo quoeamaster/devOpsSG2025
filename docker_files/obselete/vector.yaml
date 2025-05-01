@@ -1,0 +1,13 @@
+# vector.yaml
+# A minimal Vector configuration
+sources:
+  in:
+    type: "stdin"
+sinks:
+  out:
+    inputs: 
+      - "in"
+    type: clickhouse
+    endpoint: http://clickhouse:8123
+    table: sample_logs
+    format: json_each_row

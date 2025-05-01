@@ -1,0 +1,43 @@
+
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:25.2
+    container_name: clickhouse
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+      - ./clickhouse-init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: wget --no-verbose --spider http://localhost:8123/ping || exit 1
+      interval: 3s
+      retries: 5
+
+  fluent-bit:
+    image: fluent/fluent-bit:4.0
+    container_name: fluent-bit
+    depends_on:
+      - clickhouse
+    volumes:
+      - ./fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
+    ports:
+      - "5170:5170"   # Log input
+
+  python:
+    image: python:3.14.0a7
+    container_name: python
+    depends_on:
+      - clickhouse
+      - fluent-bit
+    volumes:
+      - ./../src:/src
+    # command: ["python3", "/src/log_generator.py"]
+    command: >
+      sh -c "pip3 install --no-cache-dir --root-user-action=ignore fluent-logger &&
+            echo "yo~~~~~" &&
+            python3 /src/log_generator.py"
+
+volumes:
+  clickhouse-data:
+
