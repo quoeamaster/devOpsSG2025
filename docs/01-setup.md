@@ -8,7 +8,7 @@ In this section, we'll set up the local environment required to run the workshop
 
 ## 📦 Prerequisites
 
-### ✅ 1. Install Python 3 (via Homebrew)
+### ✅ 1. (optional) Install Python 3 (via Homebrew)
 
 If you don’t have Homebrew yet, install it first:
 
