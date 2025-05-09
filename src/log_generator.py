@@ -1,8 +1,6 @@
 import time
 import random
 import clickhouse_connect
-import json
-import socket
 
 client = clickhouse_connect.get_client(
     host='clickhouse',

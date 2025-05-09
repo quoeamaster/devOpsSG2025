@@ -1,3 +1,6 @@
+# misc
+docs/slides/source-deck.pdf
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
