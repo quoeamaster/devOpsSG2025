@@ -172,7 +172,7 @@ select count() from sample_logs_analytics;
 
 <div style="text-align:center; margin-top: 20px; font-size: 20px;">
 
-🔧 [prev - clickhouse](02-clickhouse.md) &nbsp;&nbsp;&nbsp; 🔍 [next - data generator](03-data-generator.md)
+🔧 [prev - clickhouse](02-clickhouse.md) &nbsp;&nbsp;&nbsp; 🔍 [next - grafana](04-grafana.md)
 
 </div>
 
